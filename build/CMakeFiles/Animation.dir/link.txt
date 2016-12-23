@@ -1,1 +1,0 @@
-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++    -Wl,-search_paths_first -Wl,-headerpad_max_install_names  CMakeFiles/Animation.dir/main.cpp.o  -o Animation  -L/Users/mike/Documents/AnimationProject/raytracer/build  -lraytracer -Wl,-rpath,/Users/mike/Documents/AnimationProject/raytracer/build 
