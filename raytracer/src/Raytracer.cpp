@@ -371,7 +371,7 @@ void Raytracer::savebmp (const char *filename, int w, int h, int dpi, RGBType *d
 
 
 Raytracer::Raytracer(){
-    cout << "CREATING RAYTRACER \n";
+    cout << getcwd << endl;
     t1 = clock();
 
     dpi = 72;
