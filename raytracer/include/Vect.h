@@ -16,7 +16,9 @@ class Vect {
     double getX();
     double getY();
     double getZ();
-    
+    void setX(double xn);
+    void setY(double yn);
+    void setZ(double zn);
     double magnitude ();
         
     
@@ -30,6 +32,7 @@ class Vect {
     Vect add (Vect v);
 
     Vect mult (double scalar);
+    void print ();
 };
 
 

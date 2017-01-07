@@ -1,5 +1,6 @@
 #include "Sphere.h"
-
+#include <iostream>
+using namespace std;
 Vect Sphere::getCenter(){return center;}
 double Sphere::getRadius(){return radius;}
 Color Sphere::getColor(){return color;}
@@ -57,7 +58,22 @@ double Sphere::findIntersection(Ray ray) {
 }
 
 
-
+void Sphere::rotate(Matrix r){
+    center = r.vectMult(center);
+}
+void Sphere::rotateY(double s){
+    Vect r (0,1,0);
+    Matrix m (r, s);
+    rotate(m);
+}
+void Sphere::rotateX(double s){
+    Vect r (1,0,0);
+    Matrix m (r, s);
+    rotate(m);
+}
+void Sphere::scale(double s){
+    radius = radius * s;
+}
 
 Sphere::Sphere(){
     center = Vect(0,0,0);

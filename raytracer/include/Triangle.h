@@ -8,17 +8,23 @@ using namespace std;
 class Triangle: public Object{
 
     Vect A, B, C;
+    Vect* Ap; Vect* Bp; Vect* Cp;
+    Vect normalA;
+    Vect normalB;
+    Vect normalC;
     Vect normal;
     double distance;
     Color color;
+    bool setNorm;
 
     public:
 
     Triangle();
-
     Triangle  (Vect, Vect,  Vect, Color);
-
+    Triangle  (Vect*, Vect*,  Vect*, Color);
+    Triangle  (Vect*, Vect*,  Vect*, Vect, Vect, Vect, Color);
     //method functions
+
 
     Vect getA();
     Vect getB();
@@ -30,6 +36,7 @@ class Triangle: public Object{
     double getTriangleDistance();
 
     virtual void rotate(Matrix r);
+    virtual void scale(double x, double y, double z);
     virtual double findIntersection(Ray ray);
     
 };

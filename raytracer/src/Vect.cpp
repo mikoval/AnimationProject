@@ -1,11 +1,14 @@
 #include "Vect.h"
 #include "math.h"
-
+#include <iostream>
 
     double Vect::getX() { return x; }
     double Vect::getY() { return y; }
     double Vect::getZ() { return z; }
-    
+
+    void Vect::setX(double xn) { x = xn; }
+    void Vect::setY(double yn) { y = yn; }
+    void Vect::setZ(double zn) { z = zn; }
     double Vect::magnitude () {
         return sqrt((x*x) + (y*y) + (z*z));
     }
@@ -33,6 +36,9 @@
 
     Vect Vect::mult (double scalar) {
         return Vect (x*scalar, y*scalar, z*scalar);
+    }
+    void Vect::print () {
+        std::cout << "(" << x << ", " << y << ", " << z << ")" << std::endl;
     }
 
 

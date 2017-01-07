@@ -1,9 +1,45 @@
 #include "Triangle.h"
+#include "Matrix4x4.h"
 Vect Triangle::getA(){return A;}
 Vect Triangle::getB(){return B;}
 Vect Triangle::getC(){return C;}
 Color Triangle::getColor(){return color;}
 Vect Triangle::getNormalAt(Vect point){
+    if(setNorm){
+        
+        Vect n = getTriangleNormal();
+
+        Vect ba = B.add(A.negative()).negative();
+        Vect ca = C.add(A.negative()).negative();
+
+        Vect ap = A.add(point.negative()).negative();
+        Vect bp = B.add(point.negative()).negative();
+        Vect cp = C.add(point.negative()).negative();
+
+
+        double areaABC = n.dotProduct(ba.crossProduct(ca));
+        double areaPBC = n.dotProduct(bp.crossProduct(cp));
+        double areaPCA = n.dotProduct(cp.crossProduct(ap));
+
+
+        if(areaABC < 0){areaABC = -areaABC;}
+        if(areaPBC < 0){areaPBC = -areaPBC;}
+        if(areaPCA < 0){areaPCA = -areaPCA;}
+        
+
+       
+        //real areaABC = DOT( normal, CROSS( (b - a), (c - a) )  ) ;
+        //real areaPBC = DOT( normal, CROSS( (b - P), (c - P) )  ) ;
+        //real areaPCA = DOT( normal, CROSS( (c - P), (a - P) )  ) ;
+
+        double u = areaPBC / areaABC ; // alpha
+        double v = areaPCA / areaABC ; // beta
+        double w = 1.0f - u - v ; // gamma
+
+        
+
+        return (normalA.mult(u)).add(normalB.mult(v)).add(normalC.mult(w)).normalize();
+    }
     return getTriangleNormal();
 }
 Vect Triangle::getTriangleNormal(){
@@ -18,9 +54,28 @@ double Triangle::getTriangleDistance(){
     return distance;
 }
 void Triangle::rotate(Matrix r){
-    A = r.vectMult(A);
-    B = r.vectMult(B);
-    C = r.vectMult(C);
+    Matrix4x4 m(r);
+    A = m.mult(A);
+    B = m.mult(B);
+    C = m.mult(C);
+    m = m.inverse();
+    m = m.transpose();
+    normalA = m.mult(normalA);
+    normalB = m.mult(normalB);
+    normalC = m.mult(normalC);
+}
+void Triangle::scale(double x, double y, double z){
+    A.setX(A.getX() * x); 
+    B.setX(B.getX() * x); 
+    C.setX(C.getX() * x); 
+
+    A.setY(A.getY() * y); 
+    B.setY(B.getY() * y); 
+    C.setY(C.getY() * y); 
+
+    A.setZ(A.getZ() * z); 
+    B.setZ(B.getZ() * z); 
+    C.setZ(C.getZ() * z); 
 
 
 }
@@ -75,16 +130,45 @@ Triangle::Triangle(){
     A = Vect(1,0,0);
     B = Vect(0,1,0);
     C = Vect(0,0,1);
-    
-    normal = Vect(1,0,0);
+    Ap = &A;
+    Bp = &B;
+    Cp = &C;
+    normalA = Vect(1,0,0);
     distance  = 1;
     color = Color(.5,.5,.5,0);
    
 }
 
+Triangle::Triangle(Vect* a, Vect* b, Vect* c, Color col){
+    Ap = a;
+    Bp = b; 
+    Cp = c;
+    A = *Ap;
+    B = *Bp;
+    C = *Cp;
+    color = col;
+}
+Triangle::Triangle(Vect* a, Vect* b, Vect* c, Vect na, Vect nb, Vect nc, Color col){
+    Ap = a;
+    Bp = b; 
+    Cp = c;
+    A = *Ap;
+    B = *Bp;
+    C = *Cp;
+    normalA = na;
+    normalB = nb;
+    normalC = nc;
+    setNorm = true;
+    color = col;
+}
 Triangle::Triangle(Vect a, Vect b, Vect c, Color col){
     A = a;
-    B = b; 
+    B = b;
     C = c;
+
+    Ap = &A;
+    Bp = &B; 
+    Cp = &C;
+    
     color = col;
 }

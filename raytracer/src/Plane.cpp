@@ -11,12 +11,13 @@ double Plane::findIntersection(Ray ray) {
     
     double a = ray_direction.dotProduct(normal);
     
-    if (a == 0) {
+    if (a <.0001 && a > -.0001) {
         // ray is parallel to the plane
         return -1;
     }
     else {
         double b = normal.dotProduct(ray.getOrigin().add(normal.mult(distance).negative()));
+        if (1*b/a <.0001 && 1*b/a > -.0001){return -1;}
         return -1*b/a;
     }
 }

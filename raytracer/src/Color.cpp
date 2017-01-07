@@ -4,12 +4,15 @@ double Color::getRed(){return red;}
 double Color::getGreen(){return green;}
 double Color::getBlue(){ return blue;}
 double Color::getSpecial(){ return special;}
+double Color::getSpecularity(){ return specularity;}
+double Color::getTransparency(){ return transparency;}
 
 void Color::setRed(double r){ red = r;};
 void Color::setGreen(double g){ green = g; };
 void Color::setBlue(double b){ blue = b;};
 void Color::setSpecial(double s){special = s;};
-
+void Color::setSpecularity(double s){ specularity = s;}
+void Color::setTransparency(double t){ transparency = t;}
 double Color::brightness(){
     return(red + green + blue) /3;
 }
@@ -53,5 +56,16 @@ Color::Color(double r, double g, double b, double s){
     red = r;
     green = g;
     blue = b;
-    special = s;
+    specularity = s;
+    transparency = 0;
+    special = 0;
+    
+}
+Color::Color(double r, double g, double b, double s,  double t, double spec){
+    red = r;
+    green = g;
+    blue = b;
+    specularity = s;
+    transparency = t;
+    special = spec;
 }

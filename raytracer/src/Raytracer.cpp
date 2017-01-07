@@ -1,7 +1,7 @@
 #include "Raytracer.h"
 int Raytracer::closestObjectIndex(vector<double> intersections){
 //return index of smallest value greater than 0
-    int index;
+    int index = -1;
     if(intersections.size() ==0 ){
         return -1;
     }
@@ -27,6 +27,8 @@ int Raytracer::closestObjectIndex(vector<double> intersections){
                     index = i;
                 }
             }
+            
+
             return index;
         }
         else{
@@ -56,9 +58,27 @@ Color Raytracer::getColorAt(Vect intersection_position,Vect intersecting_directi
             winning_object_color.setBlue(1);
         }
     }
+    if (winning_object_color.getSpecial() == 3) {
+        // checkered/tile floor pattern
+        
+        int square = intersection_position.getX() - intersection_position.getY() + 100;
+        bool cond = (int)(square * 10) % 4 == 0 ;
+        if (cond ) {
+            // black tile
+            winning_object_color.setRed(0);
+            winning_object_color.setGreen(0);
+            winning_object_color.setBlue(0);
+        }
+        else {
+            // white tile
+            winning_object_color.setRed(1);
+            winning_object_color.setGreen(1);
+            winning_object_color.setBlue(1);
+        }
+    }
     Color final_color = winning_object_color.scalar(ambientlight);
     
-    if (winning_object_color.getSpecial() > 0 && winning_object_color.getSpecial() <= 1) {
+    if (winning_object_color.getSpecularity() > 0 && winning_object_color.getSpecularity() <= 1) {
         // reflection from objects with specular intensity
         double dot1 = winning_object_normal.dotProduct(intersecting_direction.negative());
         Vect scalar1 = winning_object_normal.mult(dot1);
@@ -92,7 +112,7 @@ Color Raytracer::getColorAt(Vect intersection_position,Vect intersecting_directi
                     //reflection_intersection_color = Color(1, 1, 1, 0);
                     //cout << reflection_intersection_color.getRed() * 255 << ", " << reflection_intersection_color.getGreen() * 255 << ", " << reflection_intersection_color.getBlue() * 255 << ", " << endl;
                     //cout << final_color.getRed() * 255 << ", " << final_color.getGreen() * 255 << ", " << final_color.getBlue() * 255 << ", " << endl;
-                    final_color = final_color.add(reflection_intersection_color.scalar(winning_object_color.getSpecial()));
+                    final_color = final_color.add(reflection_intersection_color.scalar(winning_object_color.getSpecularity()));
                     //cout << final_color.getRed() * 255 << ", " << final_color.getGreen() * 255 << ", " << final_color.getBlue() * 255 << ", " << endl;
 
                 }
@@ -105,7 +125,57 @@ Color Raytracer::getColorAt(Vect intersection_position,Vect intersecting_directi
      
          
     }
-    
+    if (winning_object_color.getTransparency() > 0 && winning_object_color.getTransparency() <= 1) {
+        // refraction from objects with specular intensity
+       
+        double ind = 1/1.3;
+        if(winning_object_normal.dotProduct(intersecting_direction) > 0){
+            ind = 1.3/1;
+        }
+        double c1 = winning_object_normal.dotProduct(intersecting_direction);
+        double c2 = sqrt(1-(ind*ind) * (1- c1*c1));
+
+
+        Vect reflection_direction = intersecting_direction.add(winning_object_normal.mult(c1)).mult(ind).add(winning_object_normal.mult(c2).negative());
+       
+        Ray reflection_ray (intersection_position, reflection_direction);
+        
+        // determine what the ray intersects with first
+        vector<double> reflection_intersections;
+        
+        for (int reflection_index = 0; reflection_index < scene_objects.size(); reflection_index++) {
+            reflection_intersections.push_back(scene_objects.at(reflection_index)->findIntersection(reflection_ray));
+        }
+        
+        int index_of_winning_object_with_reflection = closestObjectIndex(reflection_intersections);
+        
+        if (index_of_winning_object_with_reflection != -1) {
+            // reflection ray missed everthing else
+            if (reflection_intersections.at(index_of_winning_object_with_reflection) > accuracy) {
+                // determine the position and direction at the point of intersection with the reflection ray
+                // the ray only affects the color if it reflected off something
+                
+                Vect reflection_intersection_position = intersection_position.add(reflection_direction.mult(reflection_intersections.at(index_of_winning_object_with_reflection)));
+                Vect reflection_intersection_ray_direction = reflection_direction;
+                if(n > 0){
+                    Color reflection_intersection_color = getColorAt(reflection_intersection_position, reflection_intersection_ray_direction, scene_objects, index_of_winning_object_with_reflection, light_sources, accuracy, ambientlight, n-1);
+                       
+                    //reflection_intersection_color = Color(1, 1, 1, 0);
+                    //cout << reflection_intersection_color.getRed() * 255 << ", " << reflection_intersection_color.getGreen() * 255 << ", " << reflection_intersection_color.getBlue() * 255 << ", " << endl;
+                    //cout << final_color.getRed() * 255 << ", " << final_color.getGreen() * 255 << ", " << final_color.getBlue() * 255 << ", " << endl;
+                    final_color = final_color.add(reflection_intersection_color.scalar(winning_object_color.getTransparency()));
+                    //cout << final_color.getRed() * 255 << ", " << final_color.getGreen() * 255 << ", " << final_color.getBlue() * 255 << ", " << endl;
+
+                }
+
+                
+            }
+        }
+      
+
+     
+         
+    }
     for (int light_index = 0; light_index < light_sources.size(); light_index++){
         Vect light_direction = light_sources.at(light_index) -> getPosition().add(intersection_position.negative()).normalize();
         float cosine_angle = winning_object_normal.dotProduct(light_direction);
@@ -126,7 +196,7 @@ Color Raytracer::getColorAt(Vect intersection_position,Vect intersecting_directi
             }
             
             for (int c = 0; c < secondary_intersections.size(); c++) {
-                if (secondary_intersections.at(c) > accuracy) {
+                if (secondary_intersections.at(c) > .1) {
                     if (secondary_intersections.at(c) <= distance_to_light_magnitude) {
                         shadowed = true;
                     }
@@ -137,7 +207,7 @@ Color Raytracer::getColorAt(Vect intersection_position,Vect intersecting_directi
             if (shadowed == false) {
                 final_color = final_color.add(winning_object_color.multiply(light_sources.at(light_index)->getColor()).scalar(cosine_angle));
                 
-                if (winning_object_color.getSpecial() > 0 && winning_object_color.getSpecial() <= 1) {
+                if (winning_object_color.getSpecularity() > 0 && winning_object_color.getSpecularity() <= 1) {
                     // special [0-1]
                     double dot1 = winning_object_normal.dotProduct(intersecting_direction.negative());
                     Vect scalar1 = winning_object_normal.mult(dot1);
@@ -148,9 +218,10 @@ Color Raytracer::getColorAt(Vect intersection_position,Vect intersecting_directi
                     
                     double specular = reflection_direction.dotProduct(light_direction);
                     if (specular > 0) {
-
+                        //cout << "specular" << endl;
                         specular = pow(specular, 10);
-                        final_color = final_color.add(light_sources.at(light_index)->getColor().scalar(specular*winning_object_color.getSpecial()));
+                        //cout<< specular << endl;
+                        final_color = final_color.add(light_sources.at(light_index)->getColor().scalar(specular*winning_object_color.getSpecularity()));
                     }
                 }
                 
@@ -371,7 +442,7 @@ void Raytracer::savebmp (const char *filename, int w, int h, int dpi, RGBType *d
 
 
 Raytracer::Raytracer(){
-    cout << getcwd << endl;
+    
     t1 = clock();
 
     dpi = 72;
@@ -385,13 +456,13 @@ Raytracer::Raytracer(){
     aathreshold = 0.1;
     aspectratio = (double)width/ (double)height;
     ambientlight = 0.2;
-    accuracy = 0.00000000000001;
+    accuracy = 0.0000001;
     O = Vect(0,0,0);
     X = Vect(1,0,0);
     Y = Vect(0,1,0);
     Z = Vect(0,0,1);
 
-    campos = Vect(-3,3, -7);
+    campos = Vect(-3,6, -10);
     look_at = Vect(0,0,0);
     diff_btw = Vect(campos.getX() - look_at.getX(), campos.getY() - look_at.getY(), campos.getZ() - look_at.getZ());
     

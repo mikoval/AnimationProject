@@ -16,7 +16,18 @@ class Rectangle: public Object{
     double length;
     double width;
     double height;
+    vector<Vect> corners;
     vector<Triangle*> triangles;
+
+    Vect c1;
+    Vect c2;
+    Vect c3;
+    Vect c4;
+    Vect c5;
+    Vect c6;
+    Vect c7;
+    Vect c8;
+
     Triangle t1;
     Triangle t2;
     Triangle t3;
@@ -44,6 +55,8 @@ class Rectangle: public Object{
     virtual Vect getNormalAt(Vect point);
     virtual double findIntersection(Ray ray);
     virtual void rotate(Matrix r);
+    virtual void rotateY(double s);
+    virtual void rotateX(double s);
     
 
 };

@@ -15,20 +15,11 @@ class Pyramid: public Object{
     double radius;
     double height;
     Color color;
+
+    vector<Vect> corners;
     vector<Triangle*> triangles;
     vector<Triangle> triangleOs;
-    Triangle t1;
-    Triangle t2;
-    Triangle t3;
-    Triangle t4;
-    Triangle t5;
-    Triangle t6;
-    Triangle t7;
-    Triangle t8;
-    Triangle t9;
-    Triangle t10;
-    Triangle t11;
-    Triangle t12;
+
     public:
 
     Pyramid();

@@ -1,5 +1,7 @@
 #include "Pyramid.h"
 #include "Raytracer.h"
+#include <iostream>
+using namespace std;
 bool Pyramid::pointInTriangle(Triangle t, Vect p){
     Vect normal = t.getNormalAt(p);
     Vect A = t.getA();
@@ -36,30 +38,27 @@ void Pyramid::createPyramid(){
     Vect base_center = Vect(cx, cy, cz); 
     Vect top = Vect(cx, cy+height, cz);
     
-    vector<Vect> base_corners;
-    /*Vect c1 = Vect(cx+ radius, cy, cz);
-    Vect c2 = Vect(cx - radius, cy, cz);
-    Vect c3 = Vect(cx, cy, cz+radius);
-
-    base_corners.push_back(c1);
-    base_corners.push_back(c2);
-    base_corners.push_back(c3);*/
+    corners.push_back(base_center);
+    corners.push_back(top);
     double amnt = 6.28318 / sides;
     for (int i = 0; i < sides; i++){
         Vect c = Vect(cx+ radius*cos(amnt*i), cy, cz+ radius*sin(amnt*i));
-        base_corners.push_back(c);
+        corners.push_back(c);
+    }
+    for (int i = 0; i < corners.size(); i++){
+        corners[i].print();
     }
      //base 
-    for(int i = 0; i < base_corners.size(); i++){
+    for(int i = 2; i < corners.size(); i++){
         int i1 = i;
         int i2 = i+1;
-        if(i2 == base_corners.size()){
-            i2 = 0;
+        if(i2 == corners.size()){
+            i2 = 2;
         }
-        Vect corner1 = base_corners.at(i1);
-        Vect corner2 = base_corners.at(i2);
-        Triangle t1 = Triangle(base_center, corner1, corner2, color);
-        Triangle t2 = Triangle(top, corner1, corner2, color);
+        Vect* corner1 = &corners[i1];
+        Vect* corner2 = &corners[i2];
+        Triangle t1 = Triangle(&corners[0], corner1, corner2, color);
+        Triangle t2 = Triangle(&corners[1], corner1, corner2, color);
 
         triangleOs.push_back(t1);
 
@@ -84,11 +83,15 @@ Vect Pyramid::getNormalAt(Vect point){
     return Vect(0,0,0);
 }
 double Pyramid::findIntersection(Ray ray) {
+
+    
     vector<double> intersections;      
     
     for (int index = 0; index < triangles.size(); index++) {
         Triangle* op  =  triangles.at(index);
         Triangle o = *op;
+        Vect a = o.getC();
+
         intersections.push_back(o.findIntersection(ray));   
     }
 

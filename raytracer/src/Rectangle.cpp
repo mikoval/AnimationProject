@@ -1,33 +1,42 @@
 #include "Rectangle.h"
-
+#include <iostream>
+using namespace std;
 bool Rectangle::pointInTriangle(Triangle t, Vect p){
     Vect normal = t.getNormalAt(p);
     Vect A = t.getA();
-    Vect B = t.getB();
-    Vect C = t.getC();
+    Vect B = t.getC();
+    Vect C = t.getB();
+
     Vect Q = p;
-    Vect CA (C.getX()- A.getX(),C.getY()- A.getY(), C.getZ()- A.getZ()); 
     Vect QA (Q.getX()- A.getX(),Q.getY()- A.getY(), Q.getZ()- A.getZ()); 
-    double test1 = (CA.crossProduct(QA)).dotProduct(normal);
-
-    Vect BC (B.getX()- C.getX(),B.getY()- C.getY(), B.getZ()- C.getZ()); 
-    Vect QC (Q.getX()- C.getX(),Q.getY()- C.getY(), Q.getZ()- C.getZ()); 
-    double test2 = (BC.crossProduct(QC)).dotProduct(normal);
-
-    Vect AB (A.getX()- B.getX(), A.getY()- B.getY(), A.getZ()- B.getZ()); 
-    Vect QB (Q.getX()- B.getX(),Q.getY()- B.getY(), Q.getZ()- B.getZ()); 
-    double test3 = (AB.crossProduct(QB)).dotProduct(normal);
-
-    double test4 = QA.dotProduct(t.getNormalAt(p));
   
 
-    if(test1 >= 0 && test2 >= 0 && test3 >= 0 && test4 < .00001 && test4 > -.00001){
+    Vect QC (Q.getX()- C.getX(),Q.getY()- C.getY(), Q.getZ()- C.getZ()); 
+ 
+    Vect QB (Q.getX()- B.getX(),Q.getY()- B.getY(), Q.getZ()- B.getZ()); 
+    QA = QA.negative();
+    QB = QB.negative();
+    QC = QC.negative();
 
+    double a1 = acos( QA.dotProduct(QB) / (QA.magnitude()* QB.magnitude()));
+    double a2 = acos( QB.dotProduct(QC) / (QB.magnitude()* QC.magnitude()));
+    double a3 = acos( QC.dotProduct(QA) / (QC.magnitude()* QA.magnitude()));
+    if(a1 < 0){ a1 = -1;}
+    if(a2 < 0){ a2 = -1;}
+    if(a3 < 0){ a3 = -1;}
+
+    double test4 = QA.dotProduct(t.getNormalAt(p));
+    if(a1 + a2 + a3 < 3.1415926 * 2 + .0001 &&  a1 + a2 + a3 < 3.1415926 * 2 - .0001 && test4 < .00001 && test4 > -.00001){
         return true;
     }
     else{
         return false;
     }
+
+    
+    
+
+   
 }
 void Rectangle::createRectangle(){
     double cx = center.getX();
@@ -36,36 +45,43 @@ void Rectangle::createRectangle(){
     double w = width/2;
     double h = height/2;
     double l = length/2;
-    Vect c1 = Vect(cx-w, cy+h, cz+l);
-    Vect c2 = Vect(cx+w, cy+h, cz+l);
-    Vect c3 = Vect(cx-w, cy-h, cz+l);
-    Vect c4 = Vect(cx+w, cy-h, cz+l);
+     c1 = Vect(cx-w, cy+h, cz+l);
+     c2 = Vect(cx+w, cy+h, cz+l);
+     c3 = Vect(cx-w, cy-h, cz+l);
+     c4 = Vect(cx+w, cy-h, cz+l);
 
    
 
-    Vect c5 = Vect(cx-w, cy+h, cz-l);
-    Vect c6 = Vect(cx+w, cy+h, cz-l);
-    Vect c7 = Vect(cx-w, cy-h, cz-l);
-    Vect c8 = Vect(cx+w, cy-h, cz-l);
-    //front 
-     t1 = Triangle(c1, c2, c3, color);
-     t2 = Triangle(c2, c4, c3, color);
-    //back
-     t3 = Triangle(c5, c7, c6, color);
-     t4 = Triangle (c6, c7, c8, color);
-    //left
-     t5 = Triangle(c1, c3, c5, color);
-     t6 = Triangle(c5, c3, c7, color);
-    //right
-     t7 = Triangle(c6, c8, c2, color);
-     t8 = Triangle(c2, c8, c4, color);
-    //top
-     t9 = Triangle(c1, c5, c2, color);
-     t10 = Triangle(c5, c6, c2, color);
-    //bottom
-     t11 = Triangle(c3, c4, c7, color);
-     t12 = Triangle(c4, c8, c7, color);
+     c5 = Vect(cx-w, cy+h, cz-l);
+     c6 = Vect(cx+w, cy+h, cz-l);
+     c7 = Vect(cx-w, cy-h, cz-l);
+     c8 = Vect(cx+w, cy-h, cz-l);
+
+    corners.push_back(c1); corners.push_back(c2);
+    corners.push_back(c3); corners.push_back(c4);
+    corners.push_back(c5); corners.push_back(c6);
+    corners.push_back(c7); corners.push_back(c8);
+
+ 
     
+     //front 
+     t1 = Triangle(&corners[0], &corners[1], &corners[2], color);
+     t2 = Triangle(&corners[1], &corners[3], &corners[2], color);
+    //back
+     t3 = Triangle(&corners[4], &corners[6], &corners[5], color);
+     t4 = Triangle(&corners[5], &corners[6], &corners[7], color);
+    //left
+     t5 = Triangle(&corners[0], &corners[2], &corners[4], color);
+     t6 = Triangle(&corners[4], &corners[2], &corners[6], color);
+    //right
+     t7 = Triangle(&corners[5], &corners[7], &corners[1], color);
+     t8 = Triangle(&corners[1], &corners[7], &corners[3], color);
+    //top
+     t9 = Triangle(&corners[0], &corners[4], &corners[1], color);
+     t10 = Triangle(&corners[4], &corners[5], &corners[1], color);
+    //bottom
+     t11 = Triangle(&corners[2], &corners[3], &corners[6], color);
+     t12 = Triangle(&corners[3], &corners[7], &corners[6], color);
 
 
     triangles.push_back(dynamic_cast<Triangle*>(&t1));
@@ -123,8 +139,16 @@ void Rectangle::rotate(Matrix r){
     
     }
 }
-    
-
+void Rectangle::rotateY(double s){
+    Vect r (0,1,0);
+    Matrix m (r, s);
+    rotate(m);
+}
+void Rectangle::rotateX(double s){
+    Vect r (1,0,0);
+    Matrix m (r, s);
+    rotate(m);
+}
 
 
 Rectangle::Rectangle(){
