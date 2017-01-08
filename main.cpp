@@ -14,7 +14,7 @@
 using namespace std;
 
 void animateY(vector <Object*> scene_objects){
-    Matrix m = Matrix(Vect(1,0,0), 3.1415926/50);
+    Matrix m = Matrix(Vect(0,1,0), 3.1415926/50);
      
     scene_objects[0] -> rotate(m);
    
@@ -42,7 +42,7 @@ int main (int argc, char *argv[]){
     Color shiny_grey ( 0.3,0.3,0.3,0);
     Color white ( 0.9,0.9,0.9,1.0);
     Color shiny_green ( 0.2,0.9,0.2,0.3);
-    Color shiny_blue ( 0.2,0.2,0.6,0.3);
+    Color shiny_blue ( 0.2,0.2,0.6,0.1);
     Color blue (0, 0, 1, 0);
     Color reflective (0,0,0,1);
     Color tiles (0,0,0,0,0,2);
@@ -57,14 +57,16 @@ int main (int argc, char *argv[]){
     light_sources.push_back(dynamic_cast<Source*>(&scene_light));
     //scene objects 
 
-    TriangleMesh r = TriangleMesh("smoothtorus.obj", shiny_blue);
+    TriangleMesh r = TriangleMesh("teapot.obj", shiny_blue);
     scene_objects.push_back(dynamic_cast<Object*>(&r));  
 
-    r.scale(4,4,4 );
+    r.scale(3,3,3 );
     //r.translate(Vect(0,4,0));
     
     Sphere s1 = Sphere(Vect(0, 0, 0), 1, shiny_white);
-    scene_objects.push_back(dynamic_cast<Object*>(&s1));
+    //scene_objects.push_back(dynamic_cast<Object*>(&s1));
+    Matrix m = Matrix(Vect(0,1,0), 3.1415926);
+    r.rotate(m);
 
     Plane scene_plane (Vect(0,1,0), -100, maroon_light);
     scene_objects.push_back(dynamic_cast<Object*>(&scene_plane));
@@ -127,7 +129,7 @@ int main (int argc, char *argv[]){
     Raytracer tracer = Raytracer();
     std::string name;
 
-    for (double i = 0; i < 50; i++){
+    for (double i = 50; i < 100; i++){
         name = "pictures/scene" + std::to_string((int)(i)) + ".bmp";
         cout << name << endl;
         cout << "CALLING GENERATE \n";

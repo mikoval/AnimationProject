@@ -245,6 +245,7 @@ int Raytracer::generate (vector<Object*> objs, vector<Source*>lights, std::strin
     double xamnt, yamnt;
     int thisone, aa_index;
     for (int x = 0; x < width; x++) {
+       // cout << x << " of " << width << endl;
         for (int y = 0; y < height; y++) {
             thisone = y*width + x;
             
