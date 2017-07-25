@@ -2,7 +2,7 @@
 
 Vect  Plane::getNormal(){return normal;}
 double Plane::getDistance(){return distance;}
-Color Plane::getColor(){return color;}
+Color Plane::getColor(Vect p){return color;}
 Vect Plane::getNormalAt(Vect point ){
     return normal;
 }

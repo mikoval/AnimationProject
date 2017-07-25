@@ -20,7 +20,7 @@ class Plane: public Object{
 
     Vect  getNormal();
     double getDistance();
-    virtual Color getColor();
+    virtual Color getColor(Vect p);
     virtual Vect getNormalAt(Vect point );
     virtual double findIntersection(Ray ray);
 };

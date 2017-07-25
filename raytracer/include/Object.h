@@ -10,12 +10,14 @@ class Object {
     
     public:
     Matrix4x4 rotation;
+    Matrix4x4 inverse;
     Vect position;
+    bool clearLight;
     Object();
 
     //method functions
-
-    virtual Color getColor();
+    virtual bool getCL();
+    virtual Color getColor(Vect p);
     virtual int move(Vect);
     virtual double findIntersection(Ray ray);
     virtual Vect getNormalAt(Vect intersection_position);

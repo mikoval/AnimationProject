@@ -3,7 +3,69 @@
 Vect Triangle::getA(){return A;}
 Vect Triangle::getB(){return B;}
 Vect Triangle::getC(){return C;}
-Color Triangle::getColor(){return color;}
+Color Triangle::getColor(Vect point){
+    if(setText){
+        Vect n = getTriangleNormal();
+
+        Vect ba = B.add(A.negative()).negative();
+        Vect ca = C.add(A.negative()).negative();
+
+        Vect ap = A.add(point.negative()).negative();
+        Vect bp = B.add(point.negative()).negative();
+        Vect cp = C.add(point.negative()).negative();
+
+
+        double areaABC = n.dotProduct(ba.crossProduct(ca));
+        double areaPBC = n.dotProduct(bp.crossProduct(cp));
+        double areaPCA = n.dotProduct(cp.crossProduct(ap));
+
+
+        if(areaABC < 0){areaABC = -areaABC;}
+        if(areaPBC < 0){areaPBC = -areaPBC;}
+        if(areaPCA < 0){areaPCA = -areaPCA;}
+        
+
+       
+        //real areaABC = DOT( normal, CROSS( (b - a), (c - a) )  ) ;
+        //real areaPBC = DOT( normal, CROSS( (b - P), (c - P) )  ) ;
+        //real areaPCA = DOT( normal, CROSS( (c - P), (a - P) )  ) ;
+
+        double u = areaPBC / areaABC ; // alpha
+        double v = areaPCA / areaABC ; // beta
+        double w = 1.0f - u - v ; // gamma  
+        
+        
+
+        Vect uv =  (textA.mult(u)).add(textB.mult(v)).add(textC.mult(w));
+        int width = texture ->columns();
+        int height = texture ->rows();
+ 
+
+        double x = width * (uv.getX()) ; x = (int) x;
+        double y = height * (1-uv.getY()) ; y = (int) y;
+
+        //vector<unsigned int> c = texture -> getPixel(x,y); 
+        
+        //return Color(c[0]/255.0,c[1]/255.0,c[2]/255.0,0);
+
+        int row = y;
+        int column = x;
+        
+        Magick::PixelPacket *pixels = texture->getPixels(0, 0, width, height);
+        Magick::Color color = pixels[width * row + column];
+
+        double range = pow(2, texture -> modulusDepth());
+
+        double r = color.redQuantum()/range ;
+        double g = color.greenQuantum()/range ;
+        double b = color.blueQuantum()/range ;
+        double s = 0;
+        if(r!= 0 && g!= 0 && b != 0){ s = .3;}
+        return Color(r, g, b, s);
+
+    }
+    return color;
+}
 Vect Triangle::getNormalAt(Vect point){
     if(setNorm){
         
@@ -64,6 +126,14 @@ void Triangle::rotate(Matrix r){
     normalB = m.mult(normalB);
     normalC = m.mult(normalC);
 }
+void Triangle::translate(Vect v){
+    A = A.add(v);
+
+    B = B.add(v);
+    C = C.add(v);
+
+}
+
 void Triangle::scale(double x, double y, double z){
     A.setX(A.getX() * x); 
     B.setX(B.getX() * x); 
@@ -94,6 +164,34 @@ double Triangle::findIntersection(Ray ray) {
     }
     else {
         //get distance
+         ////
+    Vect v0v1 = B.add(A.negative()); 
+    Vect v0v2 = C.add(A.negative()); 
+    Vect pvec = ray.getDirection().crossProduct(v0v2); 
+    float det = v0v1.dotProduct(pvec); 
+/////
+
+    // if the determinant is negative the triangle is backfacing
+    // if the determinant is close to 0, the ray misses the triangle
+    if (det < .0000000000000000000000000001) return -1; 
+
+    // ray and triangle are parallel if det is close to 0
+    if (fabs(det) < .00000000000000000000000000001) return -1; 
+
+    float invDet = 1 / det; 
+ 
+    Vect tvec = ray.getOrigin().add(A.negative()); 
+    float u = tvec.dotProduct(pvec) * invDet; 
+    if (u < 0 || u > 1) return -1; 
+ 
+    Vect qvec = tvec.crossProduct(v0v1); 
+    float v = ray.getDirection().dotProduct(qvec) * invDet; 
+    if (v < 0 || u + v > 1) return -1; 
+    
+
+
+
+
         double b = normal.dotProduct(ray.getOrigin().add(normal.mult(distance).negative()));
         double distance_to_plane = -1*b/a;
         //get point of intersection
@@ -116,7 +214,7 @@ double Triangle::findIntersection(Ray ray) {
       
 
         if(test1 >= 0 && test2 >= 0 && test3 >= 0){
-
+      
             return distance_to_plane;
         }
         else{
@@ -159,7 +257,26 @@ Triangle::Triangle(Vect* a, Vect* b, Vect* c, Vect na, Vect nb, Vect nc, Color c
     normalB = nb;
     normalC = nc;
     setNorm = true;
+    setText = false;
     color = col;
+}
+Triangle::Triangle(Vect* a, Vect* b, Vect* c, Vect na, Vect nb, Vect nc,Vect ta, Vect tb, Vect tc, Magick::Image* text){
+    Ap = a;
+    Bp = b; 
+    Cp = c;
+    A = *Ap;
+    B = *Bp;
+    C = *Cp;
+    normalA = na;
+    normalB = nb;
+    normalC = nc;
+    textA = ta;
+    textB = tb;
+    textC = tc;
+    setNorm = true;
+    setText = true;
+    texture = text;
+
 }
 Triangle::Triangle(Vect a, Vect b, Vect c, Color col){
     A = a;
@@ -169,6 +286,7 @@ Triangle::Triangle(Vect a, Vect b, Vect c, Color col){
     Ap = &A;
     Bp = &B; 
     Cp = &C;
-    
+    setNorm = false;
+    setText = false;
     color = col;
 }

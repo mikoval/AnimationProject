@@ -70,10 +70,10 @@ class Raytracer {
     // methods
     static int closestObjectIndex(vector<double> intersections);
 
-    Color getColorAt(Vect intersection_position,Vect intersecting_direction, vector<Object*> scene_objects, int index_closest,vector<Source*> light_sources,double  accuracy,double ambientlight, int n);
+    static Color getColorAt(Vect intersection_position,Vect intersecting_direction, vector<Object*> scene_objects, int index_closest,vector<Source*> light_sources,double  accuracy,double ambientlight, int n);
 
     
-    int generate (vector<Object*> objs, vector<Source*>lights, std::string filename, int aa);
+    int generate (vector<Object*> objs, vector<Source*>lights, std::string filename, int aa, Vect, Vect, bool);
 
     void savebmp (const char *filename, int w, int h, int dpi, RGBType *data, int size);
 
